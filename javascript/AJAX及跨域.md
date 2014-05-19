@@ -96,6 +96,7 @@ $("#send").click(function(){
 **常见问题**
 1. 编码问题：使用 `encodeURIComponent` `escape` 等等
 2. 作用域问题：写在回调函数里
+3. JSON格式问题
 
 	```js
 	var arr=[1,2,3,4,5];
