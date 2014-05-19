@@ -1,0 +1,221 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>html</title>
+<link href="../lib/css/resert.css" rel="stylesheet" type="text/css" />
+<style type="text/css">
+.wrap {
+	width:910px;
+	margin:100px auto;
+}
+iframe {
+	border:1px solid #f60;
+}
+#editor{
+	float:left;
+	width:502px;
+	border:1px solid #ddd;
+	padding:0 10px 10px 10px;
+}
+#editor .bar1{
+	border-bottom:1px solid #ddd;
+}
+#editor span.button{
+	float:left;
+	border: 1px solid #CCC; 
+	margin: 5px;
+	color: #333; 
+	border-radius: 5px;
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
+	padding:2px 10px;
+	cursor:pointer;
+}
+#editor select{ 
+	float:left;
+	height:24px;
+	width:60px;
+	margin:5px;
+}
+#textarea {
+	width:500px;
+	height:300px;
+	border:1px solid #ccc;
+}
+.show_ctn {
+	float:right;
+	width:370px;
+}
+.show_ctn .b_hd{
+	font-size:14px;
+	margin-bottom:10px;
+	font-weight:bold;
+	color:#f60;
+}
+.show_ctn .b_ctn{
+	border:1px solid #ddd;
+	height:364px;
+	padding:10px;
+}
+</style>
+<script type="text/javascript">
+	var addEvent = (function () {
+		if (document.addEventListener) {
+			return function (el, type, fn) {
+				el.addEventListener(type, fn, false);
+			};
+		} else {
+			return function (el, type, fn) {
+				el.attachEvent('on' + type, function () {
+					return fn.call(el, window.event);
+				});
+			}
+		}
+	})();
+	var deliver = function(iframe){
+		addEvent(iframe.contentWindow,'blur',function(){
+			var tip = document.getElementById("show_txt");
+			iframeDocument = iframe.contentDocument || iframe.contentWindow.document;
+			tip.innerHTML = iframeDocument.body.innerHTML
+		})
+	}
+	window.onload = function(){
+		var editor = document.getElementById("editor");
+		var buttons = editor.getElementsByTagName("span");
+		var selects = editor.getElementsByTagName("select");
+		var textarea = document.getElementById("textarea");
+		textarea.style.display = "none";
+		var iframe = document.createElement("iframe");
+		iframe.style.width = "500px";
+		iframe.style.height = "300px";
+		iframe.frameBorder=0;
+		textarea.parentNode.insertBefore(iframe,textarea);
+		var iframeDocument = iframe.contentDocument || iframe.contentWindow.document;
+		iframeDocument.designMode = "on";
+		iframeDocument.open();
+		iframeDocument.write('<html><head><style type="text/css">body{ font-family:arial; font-size:14px; }</style></head></html>');
+		iframeDocument.close();
+		var switchEditMode = true;
+		for(var i = 0,l= buttons.length;i<l;i++){
+			buttons[i].onclick = new function(){
+				var command=buttons[i].getAttribute("title");
+				return function(){
+					switch(command){
+						case 'createlink':
+						case 'insertimage':
+							var value = prompt('请输入超链接:', 'http://');
+							iframeDocument.execCommand(command,false,value);
+							break;
+						case "html"://查看源码
+							if(switchEditMode){//切换到textarea
+								iframe.style.display = "none";
+								textarea.style.display = "block";
+								textarea.value = iframeDocument.body.innerHTML;
+								textarea.focus();
+								switchEditMode = false;
+							}else{//切换到iframe
+								iframe.style.display = "block";
+								textarea.style.display = "none";
+								iframeDocument.body.innerHTML = textarea.value;
+								iframe.contentWindow.focus();
+								switchEditMode = true;
+							}
+							break;
+						default:
+							iframeDocument.execCommand(command,false,'');
+							iframe.contentWindow.focus();
+					}
+				};
+			};
+		};
+		for(i=0,l=selects.length;i<l;i++){
+			selects[i].onchange = new function(){
+				var select = selects[i];
+				return function(){
+					var command = select.getAttribute("title"),
+					value = select.options[select.selectedIndex].value;
+					if(command == 'backcolor' && /a/[-1]=='a'){
+						iframeDocument.execCommand('hilitecolor',false,value);
+					}else{
+						iframeDocument.execCommand(command,false,value);
+					}
+				};
+			};
+		};
+		deliver(iframe);
+	}
+</script>
+</head>
+
+<body>
+<div class="wrap">
+
+<div id="editor">
+	<div class="tool_bar">
+		<div class="bar1 cle">
+            <span class="button" title="bold" unselectable="on">加粗</span>
+            <span class="button" title="italic" unselectable="on">斜体</span>
+            <span class="button" title="underline" unselectable="on">下划</span>
+            <span class="button" title="justifycenter" unselectable="on">居中</span>
+            <span class="button" title="justifyleft" unselectable="on">居左</span>
+            <span class="button" title="justifyright" unselectable="on">居右</span>
+            <span class="button" title="outdent" unselectable="on">悬挂</span>
+            <span class="button" title="indent" unselectable="on">缩进</span>
+            <span class="button" title="insertunorderedlist" unselectable="on">无序</span>
+            <span class="button" title="insertorderedlist" unselectable="on">有序</span>
+            <span class="button" title="createlink" unselectable="on">链接</span>
+            <span class="button" title="insertimage" unselectable="on">图片</span>
+            <span class="button" title="html" unselectable="on">源码</span>
+		</div>
+		<div class="bar2 cle">
+            <select title="fontname">
+                <option value="SimSun">宋体</option>
+                <option value="LiSu">隶书</option>
+                <option value="KaiTi_GB2312">楷体</option>
+                <option value="YouYuan">幼圆</option>
+                <option value="SimHei">黑体</option>
+                <option value="Microsoft YaHei">雅黑</option>
+                <option value="Comic Sans MS">Comic Sans MS</option>
+            </select>
+            <select title="fontsize">
+                <option value="1">特小</option>
+                <option value="2">很小</option>
+                <option value="3">小</option>
+                <option value="4">普通</option>
+                <option value="5">大</option>
+                <option value="6">很大</option>
+                <option value="7">特大</option>
+            </select>
+            <select title="forecolor">
+                <option style="background-color:#000000" value="#000000">字体</option>
+                <option style="background-color:#FF8080" value="#FF8080"></option>
+                <option style="background-color:#FFFF00" value="#FFFF00"></option>
+                <option style="background-color:#80FF00" value="#80FF00"></option>
+                <option style="background-color:#00FFFF" value="#00FFFF"></option>
+                <option style="background-color:#0000FF" value="#0000FF"></option>
+                <option style="background-color:#FF00FF" value="#FF00FF"></option>
+            </select>
+            <select title="backcolor">
+                <option style="background-color:#000000" value="#000000">背景</option>
+                <option style="background-color:#FF8080" value="#FF8080"></option>
+                <option style="background-color:#FFFF00" value="#FFFF00"></option>
+                <option style="background-color:#80FF00" value="#80FF00"></option>
+                <option style="background-color:#00FFFF" value="#00FFFF"></option>
+                <option style="background-color:#0000FF" value="#0000FF"></option>
+                <option style="background-color:#FF00FF" value="#FF00FF"></option>
+            </select>
+		</div>
+	</div>
+	<div class="editor_body">
+		<textarea id="textarea"></textarea>
+	</div>
+</div>
+
+<div class="show_ctn">
+<div class="b_hd">效果显示</div>
+<div class="b_ctn" id="show_txt"></div>
+</div>
+</div>
+</body>
+</html>
